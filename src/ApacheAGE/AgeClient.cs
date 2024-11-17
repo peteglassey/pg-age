@@ -29,13 +29,22 @@ namespace ApacheAGE
             _configuration = configuration;
         }
 
+        internal AgeClient(NpgsqlConnection connection, AgeConfiguration configuration)
+        {
+            _connection = connection;
+            _configuration = configuration;
+        }
+
         ~AgeClient() => Dispose(false);
 
         #region Connection
 
         public async Task OpenConnectionAsync(CancellationToken cancellationToken = default)
         {
-            _connection = await OpenConnectionInternalAsync(cancellationToken);
+            if (_connection == null)
+            {
+                _connection = await OpenConnectionInternalAsync(cancellationToken);
+            }
             await CreateExtensionAsync(_connection, cancellationToken);
             await AddAgCatalogToSearchPath(_connection, cancellationToken);
             await LoadExtensionAsync(_connection, cancellationToken);

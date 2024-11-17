@@ -60,4 +60,21 @@ $$) AS (num agtype);");
         var graphExists = await client.GraphExistsAsync("sidjfa23knlsd9a8dfndfhjbnzxeunjakssdf3sdmvns_asdjfk");
         Assert.That(graphExists, Is.False);
     }
+
+    [Test]
+    public async Task AgeClientBuilder_Should_Accept_NpgsqlConnection()
+    {
+        var npgsqlConnection = GetConnection();
+        var clientBuilder = new AgeClientBuilder(npgsqlConnection);
+        await using var client = clientBuilder.Build();
+
+        Assert.That(client, Is.Not.Null);
+        Assert.That(client.IsConnected, Is.False);
+
+        await client.OpenConnectionAsync();
+        Assert.That(client.IsConnected, Is.True);
+
+        await client.CloseConnectionAsync();
+        Assert.That(client.IsConnected, Is.False);
+    }
 }

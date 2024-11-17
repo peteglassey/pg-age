@@ -13,11 +13,13 @@ Here's a simple example to get you started:
 ```csharp
 using ApacheAGE;
 using ApacheAGE.Types;
+using Npgsql;
 
 var connectionString = "Host=server;Port=5432;Username=user;Password=pass;Database=sample1";
+var npgsqlConnection = new NpgsqlConnection(connectionString);
 
 // Create a client.
-var clientBuilder = new AgeClientBuilder(connectionString);
+var clientBuilder = new AgeClientBuilder(npgsqlConnection);
 await using var client = clientBuilder.Build();
 await client.OpenConnectionAsync();
 
@@ -38,3 +40,7 @@ while(await reader.ReadAsync())
     Console.WriteLine(person);
 }
 ```
+
+## Note
+
+The `AgeClientBuilder` constructor now accepts an `NpgsqlConnection` object as an optional parameter. This allows you to reuse an existing connection if needed.
