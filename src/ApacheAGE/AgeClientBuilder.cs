@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace ApacheAGE
 {
@@ -7,6 +8,7 @@ namespace ApacheAGE
     {
         private ILoggerFactory? _logger;
         private readonly string _connectionString;
+        private readonly NpgsqlConnection? _npgsqlConnection;
 
         /// <summary>
         /// Create a client builder.
@@ -23,6 +25,20 @@ namespace ApacheAGE
                 throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
 
             _connectionString = connectionString;
+        }
+
+        /// <summary>
+        /// Create a client builder with an existing NpgsqlConnection.
+        /// </summary>
+        /// <param name="npgsqlConnection">
+        /// Existing NpgsqlConnection to the database.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// A required argument is null or empty or default.
+        /// </exception>
+        public AgeClientBuilder(NpgsqlConnection npgsqlConnection)
+        {
+            _npgsqlConnection = npgsqlConnection ?? throw new ArgumentException("NpgsqlConnection cannot be null.", nameof(npgsqlConnection));
         }
 
         /// <summary>
@@ -45,7 +61,14 @@ namespace ApacheAGE
         /// set in the builder.
         /// </summary>
         /// <returns></returns>
-        public AgeClient Build() => new(_connectionString, BuildConfigurations());
+        public AgeClient Build()
+        {
+            if (_npgsqlConnection != null)
+            {
+                return new AgeClient(_npgsqlConnection, BuildConfigurations());
+            }
+            return new AgeClient(_connectionString, BuildConfigurations());
+        }
 
         private AgeConfiguration BuildConfigurations() => 
             new(_logger is null
